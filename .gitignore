@@ -4,6 +4,8 @@ target/
 !**/src/main/**
 !**/src/test/**
 
+src/main/resources/application-dev.yaml
+
 ### STS ###
 .apt_generated
 .classpath
@@ -29,3 +31,4 @@ build/
 
 ### VS Code ###
 .vscode/
+/src/main/resources/application-dev.yaml
