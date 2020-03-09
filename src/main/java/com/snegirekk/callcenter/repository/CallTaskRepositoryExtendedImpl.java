@@ -8,10 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.Root;
+import javax.persistence.criteria.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -31,9 +28,11 @@ public class CallTaskRepositoryExtendedImpl implements CallTaskRepositoryExtende
         Root<CallTask> callTask = criteriaQuery.from(CallTask.class);
         Join<CallTask, Order> order = callTask.join("order");
 
-        criteriaQuery
-                .where(criteriaBuilder.between(callTask.get("createdAt"), fromDate, toDate))
-                .where(criteriaBuilder.equal(order.get("orderNumber"), orderNumber));
+        Predicate createdBetween = criteriaBuilder.between(callTask.get("createdAt"), fromDate, toDate);
+        Predicate orderNumberEqual = criteriaBuilder.equal(order.get("orderNumber"), orderNumber);
+        javax.persistence.criteria.Order orderBy = criteriaBuilder.asc(callTask.get("createdAt"));
+
+        criteriaQuery.where(createdBetween, orderNumberEqual).orderBy(orderBy);
 
         TypedQuery<CallTask> query = entityManager.createQuery(criteriaQuery);
 
