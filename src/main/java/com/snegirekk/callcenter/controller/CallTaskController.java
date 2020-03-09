@@ -8,9 +8,13 @@ import com.snegirekk.callcenter.repository.CallTaskRepository;
 import com.snegirekk.callcenter.repository.OrderRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -46,8 +50,22 @@ public class CallTaskController extends V1ApiController {
     }
 
     @GetMapping(path = "/task")
-    public List<ListCallTaskDto> listCallTasks() {
-        List<CallTask> tasks = callTaskRepository.findAll();
+    public List<ListCallTaskDto> listCallTasks(
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam LocalDate fromDate,
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam LocalDate toDate,
+            @RequestParam(required = false) String orderNumber
+    ) {
+
+        LocalDateTime fromDateTime = LocalDateTime.of(fromDate, LocalTime.from(LocalTime.MIN));
+        LocalDateTime toDateTime = LocalDateTime.of(toDate, LocalTime.from(LocalTime.MAX));
+
+        List<CallTask> tasks;
+
+        if (null == orderNumber) {
+            tasks = callTaskRepository.findAllByCreatedAtIsBetween(fromDateTime, toDateTime);
+        } else {
+            tasks = callTaskRepository.findAllByCreatedAtIsBetween(fromDateTime, toDateTime, orderNumber);
+        }
 
         return tasks.stream()
                 .map(task -> mapper.map(task, ListCallTaskDto.class))
