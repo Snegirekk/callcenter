@@ -5,6 +5,7 @@ target/
 !**/src/test/**
 
 src/main/resources/application-dev.yaml
+.database/data
 
 ### STS ###
 .apt_generated
@@ -32,3 +33,4 @@ build/
 ### VS Code ###
 .vscode/
 /src/main/resources/application-dev.yaml
+/.database/data/
