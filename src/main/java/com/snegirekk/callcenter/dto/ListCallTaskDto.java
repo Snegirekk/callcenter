@@ -1,10 +1,10 @@
 package com.snegirekk.callcenter.dto;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 public class ListCallTaskDto {
 
     public String orderNumber;
-    public Date addedAt;
+    public LocalDateTime addedAt;
     public boolean isDone;
 }

@@ -1,7 +1,7 @@
 package com.snegirekk.callcenter.entity;
 
 import javax.persistence.*;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -15,7 +15,7 @@ public class CallTask {
     private boolean isDone;
 
     @Column
-    private Date createdAt;
+    private LocalDateTime createdAt;
 
     @OneToOne(targetEntity = Order.class)
     private Order order;
@@ -23,7 +23,7 @@ public class CallTask {
     public CallTask() {
         id = UUID.randomUUID();
         isDone = false;
-        createdAt = new Date();
+        createdAt = LocalDateTime.now();
     }
 
     public UUID getId() {
@@ -44,11 +44,11 @@ public class CallTask {
         return this;
     }
 
-    public Date getCreatedAt() {
+    public LocalDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public CallTask setCreatedAt(Date createdAt) {
+    public CallTask setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
         return this;
     }
