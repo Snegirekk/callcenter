@@ -7,5 +7,5 @@ import java.util.List;
 
 public interface CallTaskRepositoryExtended {
 
-    List<CallTask> findAllByCreatedAtIsBetween(LocalDateTime fromDate, LocalDateTime toDate, String orderNumber);
+    List<CallTask> findAllByCreatedAtIsBetweenOrderByCreatedAtAsc(LocalDateTime fromDate, LocalDateTime toDate, String orderNumber);
 }

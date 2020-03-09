@@ -8,7 +8,10 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.NoHandlerFoundException;
+
+import javax.validation.ConstraintViolationException;
 
 @ControllerAdvice
 @RequestMapping(path = "/api/v1")
@@ -26,9 +29,19 @@ public class V1ApiController {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorDto> handleNotReadableMessage(HttpMessageNotReadableException exception) {
 
-        ErrorDto error = new ErrorDto(exception.getMessage(), HttpStatus.BAD_REQUEST.value());
+        return makeBadRequestResponseFromException(exception);
+    }
 
-        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ErrorDto> handleNotReadableMessage(MethodArgumentTypeMismatchException exception) {
+
+        return makeBadRequestResponseFromException(exception);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ErrorDto> handleValidationConstraintsFailed(ConstraintViolationException exception) {
+
+        return makeBadRequestResponseFromException(exception);
     }
 
     @ExceptionHandler(ApiException.class)
@@ -36,5 +49,18 @@ public class V1ApiController {
 
         ErrorDto error = new ErrorDto(exception.getMessage(), exception.getHttpStatus().value());
         return new ResponseEntity<>(error, exception.getHttpStatus());
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorDto> handleException(Exception exception) {
+
+        ErrorDto error = new ErrorDto("Internal server error.", HttpStatus.INTERNAL_SERVER_ERROR.value());
+        return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    private ResponseEntity<ErrorDto> makeBadRequestResponseFromException(Exception exception) {
+
+        ErrorDto error = new ErrorDto(exception.getMessage(), HttpStatus.BAD_REQUEST.value());
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 }

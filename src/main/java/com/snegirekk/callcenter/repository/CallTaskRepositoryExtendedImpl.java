@@ -20,7 +20,7 @@ public class CallTaskRepositoryExtendedImpl implements CallTaskRepositoryExtende
     private EntityManager entityManager;
 
     @Override
-    public List<CallTask> findAllByCreatedAtIsBetween(LocalDateTime fromDate, LocalDateTime toDate, String orderNumber) {
+    public List<CallTask> findAllByCreatedAtIsBetweenOrderByCreatedAtAsc(LocalDateTime fromDate, LocalDateTime toDate, String orderNumber) {
 
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<CallTask> criteriaQuery = criteriaBuilder.createQuery(CallTask.class);

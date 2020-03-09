@@ -28,6 +28,11 @@ public class BadRequestException extends ApiException {
         return new BadRequestException(message);
     }
 
+    public static ApiException onInvalidQueryParams(String message) {
+
+        return new BadRequestException(message);
+    }
+
     private static String convertMapToString(Map<String, String> map) {
         return map.entrySet().stream()
                 .map(entry -> String.format("'%s' => '%s'", entry.getKey(), entry.getValue()))

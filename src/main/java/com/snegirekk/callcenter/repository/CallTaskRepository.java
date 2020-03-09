@@ -11,5 +11,5 @@ import java.util.UUID;
 public interface CallTaskRepository extends JpaRepository<CallTask, UUID>, CallTaskRepositoryExtended {
 
     boolean existsCallTaskByOrder(Order order);
-    List<CallTask> findAllByCreatedAtIsBetween(LocalDateTime fromDate, LocalDateTime toDate);
+    List<CallTask> findAllByCreatedAtIsBetweenOrderByCreatedAtAsc(LocalDateTime fromDate, LocalDateTime toDate);
 }

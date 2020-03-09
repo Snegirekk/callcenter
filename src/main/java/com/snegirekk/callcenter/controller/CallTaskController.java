@@ -4,6 +4,7 @@ import com.snegirekk.callcenter.dto.ListCallTaskDto;
 import com.snegirekk.callcenter.dto.NewCallTaskDto;
 import com.snegirekk.callcenter.entity.CallTask;
 import com.snegirekk.callcenter.entity.Order;
+import com.snegirekk.callcenter.exception.ApiException;
 import com.snegirekk.callcenter.exception.BadRequestException;
 import com.snegirekk.callcenter.repository.CallTaskRepository;
 import com.snegirekk.callcenter.repository.OrderRepository;
@@ -11,8 +12,11 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.constraints.PastOrPresent;
+import javax.validation.constraints.Pattern;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -20,6 +24,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
+@Validated
 public class CallTaskController extends V1ApiController {
 
     private CallTaskRepository callTaskRepository;
@@ -55,10 +60,14 @@ public class CallTaskController extends V1ApiController {
 
     @GetMapping(path = "/task")
     public List<ListCallTaskDto> listCallTasks(
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam LocalDate fromDate,
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam LocalDate toDate,
-            @RequestParam(required = false) String orderNumber
-    ) {
+            @PastOrPresent @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam LocalDate fromDate,
+            @PastOrPresent @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam LocalDate toDate,
+            @Pattern(regexp = "\\d{8}", message = "Order number is an eight-digits string.") @RequestParam(required = false) String orderNumber
+    ) throws ApiException {
+
+        if (fromDate.isAfter(toDate)) {
+            throw BadRequestException.onInvalidQueryParams("'fromDate' parameter should be less or equal 'toDate' parameter.");
+        }
 
         LocalDateTime fromDateTime = LocalDateTime.of(fromDate, LocalTime.from(LocalTime.MIN));
         LocalDateTime toDateTime = LocalDateTime.of(toDate, LocalTime.from(LocalTime.MAX));
@@ -66,9 +75,9 @@ public class CallTaskController extends V1ApiController {
         List<CallTask> tasks;
 
         if (null == orderNumber) {
-            tasks = callTaskRepository.findAllByCreatedAtIsBetween(fromDateTime, toDateTime);
+            tasks = callTaskRepository.findAllByCreatedAtIsBetweenOrderByCreatedAtAsc(fromDateTime, toDateTime);
         } else {
-            tasks = callTaskRepository.findAllByCreatedAtIsBetween(fromDateTime, toDateTime, orderNumber);
+            tasks = callTaskRepository.findAllByCreatedAtIsBetweenOrderByCreatedAtAsc(fromDateTime, toDateTime, orderNumber);
         }
 
         return tasks.stream()
