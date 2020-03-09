@@ -4,6 +4,7 @@ import com.snegirekk.callcenter.dto.ListCallTaskDto;
 import com.snegirekk.callcenter.dto.NewCallTaskDto;
 import com.snegirekk.callcenter.entity.CallTask;
 import com.snegirekk.callcenter.entity.Order;
+import com.snegirekk.callcenter.exception.BadRequestException;
 import com.snegirekk.callcenter.repository.CallTaskRepository;
 import com.snegirekk.callcenter.repository.OrderRepository;
 import org.modelmapper.ModelMapper;
@@ -15,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -35,12 +36,15 @@ public class CallTaskController extends V1ApiController {
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping(path = "/task")
     public void addCallTask(@RequestBody NewCallTaskDto taskDto) throws Exception {
-        Order order = orderRepository.findById(taskDto.orderId).orElseThrow(() -> new Exception("Order not found."));
+        Order order = orderRepository
+                .findById(taskDto.orderId)
+                .orElseThrow(() -> BadRequestException.onNonExistingEntity(
+                        Order.class.getSimpleName(), Collections.singletonMap("id", taskDto.orderId.toString())));
 
         boolean exists = callTaskRepository.existsCallTaskByOrder(order);
 
         if (exists) {
-            throw new Exception("The task is already added.");
+            throw BadRequestException.onIllegalDuplicate(CallTask.class.getSimpleName(), Collections.singletonMap("orderNumber", order.getOrderNumber()));
         }
 
         CallTask task = new CallTask();
